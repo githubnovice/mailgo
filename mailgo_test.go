@@ -8,7 +8,7 @@ import (
 
 func TestConfirmEmailAddressBlacklist(t *testing.T) {
 	s := Session {Email: "gladwig@gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
-	fmt.Printf("(%v, %T)\n", s, s)
+	//fmt.Printf("(%v, %T)\n", s, s)
 	err := ConfirmEmailAddressBlacklist(&s)
 	if err != nil {
 		t.Errorf("ConfirmEmailAddressBlacklist Failed\n")
@@ -17,7 +17,7 @@ func TestConfirmEmailAddressBlacklist(t *testing.T) {
 
 func TestConfirmEmailAddressUnBlacklist(t *testing.T) {
 	s := Session {Email: "gladwig@gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
-	fmt.Printf("(%v, %T)\n", s, s)
+	//fmt.Printf("(%v, %T)\n", s, s)
 	err := ConfirmEmailAddressUnBlacklist(&s)
 	if err != nil {
 		t.Errorf("ConfirmEmailUnAddressBlacklist Failed\n")
@@ -42,7 +42,7 @@ func TestConfirmEmailChangeAddress(t *testing.T) {
 
 func TestNotifyEmailAddressChange(t *testing.T) {
 	s := Session {Email: "gladwig@gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
-	err := NotifyEmailAddressChange(&s, "oldaddress@yahoo.com")
+	err := NotifyEmailAddressChange(&s, "geoff_ladwig@comcast.net")
 	if err != nil {
 		t.Errorf("Email Change Address Confirmation Failed\n")
 	}

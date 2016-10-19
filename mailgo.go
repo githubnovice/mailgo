@@ -125,7 +125,10 @@ func NotifyEmailAddressChange(ses *Session, oldaddress string) (error){
  
             The BlackListMe Team`,
 		oldaddress, ses.Email)
-	return(sendreq(ses))
+	sendreq(ses)
+	sesc := ses;
+	sesc.Email = oldaddress
+	return(sendreq(sesc))
 }
 
 // NotifyPasswordChange sends an email to an account based user when they have changed a password
@@ -153,15 +156,17 @@ func sendreq(ses *Session)(error) {
 	request.Body = mail.GetRequestBody(m)
 	response, err := sendgrid.API(request)
 	if err != nil {
-		glog.V(2).Infof("Error in sending mail to sendgrid, err = %d", err)
+		glog.V(2).Infof("Error in sending mail to sendgrid, err = %d \n", err)
 		message := fmt.Sprintf("Error in sending mail to sendgrid, err = %d", err)
 		glog.Error(message)
+		glog.Flush()
 	} else {
-		message := fmt.Sprintf("Error in sending mail to sendgrid, err = %d", err)
-		message += fmt.Sprintf("StatusCode = %s \n", response.StatusCode)
+		message := fmt.Sprintf("Success in sending mail to sendgrid, err = %d \n", err)
+		message += fmt.Sprintf("StatusCode = %d \n", response.StatusCode)
 		message += fmt.Sprintf("Body = %s \n", response.Body)
 		message += fmt.Sprintf("Headers = %s \n", response.Headers)
-		glog.Info("Success in sending mail to sendgrid \n %s", message)
+		glog.Info("Success in sending mail to sendgrid %s \n", message)
+		glog.Flush()
 	}
 	error := err
 	return(error)
