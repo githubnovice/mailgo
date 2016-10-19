@@ -6,16 +6,25 @@ import (
 	"testing"
 )
 
-func TestComplete(t *testing.T) {
+func TestConfirmEmailAddressBlacklist(t *testing.T) {
 	s := Session {Email: "gladwig@gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
 	fmt.Printf("(%v, %T)\n", s, s)
-	err := CompleteBlacklist(&s)
+	err := ConfirmEmailAddressBlacklist(&s)
 	if err != nil {
-		t.Errorf("TestComplete Failed\n")
+		t.Errorf("ConfirmEmailAddressBlacklist Failed\n")
 	}
 }
 
- func TestRegister(t *testing.T) {
+func TestConfirmEmailAddressUnBlacklist(t *testing.T) {
+	s := Session {Email: "gladwig@gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
+	fmt.Printf("(%v, %T)\n", s, s)
+	err := ConfirmEmailAddressUnBlacklist(&s)
+	if err != nil {
+		t.Errorf("ConfirmEmailUnAddressBlacklist Failed\n")
+	}
+}
+
+func TestConfirmRegistration(t *testing.T) {
 	s := Session {Email: "gladwig@gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
 	err := ConfirmRegistration(&s)
 	if err != nil {
@@ -23,36 +32,30 @@ func TestComplete(t *testing.T) {
 	}
 }
 
-func TestConfirmEmailChange(t *testing.T) {
+func TestConfirmEmailChangeAddress(t *testing.T) {
 	s := Session {Email: "gladwig@gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
-	err := ConfirmEmailChange(&s, "oldaddress@yahoo.com")
+	err := ConfirmEmailChangeAddress(&s)
 	if err != nil {
-		t.Errorf("Email Change Confirmation Failed\n")
+		t.Errorf("Email Change Address Confirmation Failed\n")
 	}
 }
 
-func TestConfirmPasswordChange(t *testing.T) {
+func TestNotifyEmailAddressChange(t *testing.T) {
 	s := Session {Email: "gladwig@gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
-	err := ConfirmPasswordChange(&s)
+	err := NotifyEmailAddressChange(&s, "oldaddress@yahoo.com")
+	if err != nil {
+		t.Errorf("Email Change Address Confirmation Failed\n")
+	}
+}
+
+func TestNotifyPasswordChange(t *testing.T) {
+	s := Session {Email: "gladwig@gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
+	err := NotifyPasswordChange(&s)
 	if err != nil {
 		t.Errorf("Password Change Confirmation Failed\n")
 	}
 }
 
-func TestConfirmEmailAddressRegistration(t *testing.T) {
-	s := Session {Email: "gladwig@gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
-	err := ConfirmEmailAddressRegistration(&s)
-	if err != nil {
-		t.Errorf("Email address Confirmation Failed\n")
-	}
-}
 
-func TestConfirmEmailDeRegistration(t *testing.T) {
-	s := Session {Email: "gladwig@gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
-	err := ConfirmEmailAddressDeRegistration(&s)
-	if err != nil {
-		t.Errorf("Email address deregistration Confirmation Failed\n")
-	}
-}
 
 

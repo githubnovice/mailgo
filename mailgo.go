@@ -8,7 +8,10 @@ import (
 	"fmt"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	//"github.com/goinggo/tracelog"
+	"github.com/golang/glog"
 	"os"
+	"flag"
 )
 
 //type mailer interface {
@@ -36,77 +39,104 @@ func NewSession(email, firstname, lastname, URL string) *Session  {
     return &sess
 }
 
-func CompleteBlacklist(ses *Session)(error) {
-	ses.subject = "BlackListMe Blacklist Confirmation"
+// Non-account based actions
+
+//ConfirmEmailAddressBlacklist sends an email to confirm a non-account based user blacklist request
+func ConfirmEmailAddressBlacklist(ses *Session)(error) {
+	ses.subject = "BlackListMe blacklist an email address confirmation"
 	ses.message = fmt.Sprintf(`Welcome to BlackListMe 
-	        This email is to confirm the request to add the email address %s to the BlackListMe blacklist.
-		Click this URL to confirm blacklisting this email address %s 
-		---------------------------------------------------------------------------------- 
-		You are receiving this email because you recently requested an email address be blacklisted 
-		at BlackListMe.net. If this wasn't you, please ignore this email` , ses.Email, ses.URL)
+        This email is to confirm the request to include %s in the BlackListMe blacklist.
+        Click this URL to confirm %s 
+ 
+        Regards,
+ 
+          The BlackListMe Team
+        ---------------------------------------------------------------------------------- 
+        You are receiving this email because you recently requested an email address be blacklisted 
+        at BlackListMe.net. If this wasn't you, please ignore this email` , ses.Email, ses.URL)
 	return(sendreq(ses))
 }
 
+//ConfirmEmailAddressUnBlacklist sends an email to confirm a non-account based user blacklist request
+func ConfirmEmailAddressUnBlacklist(ses *Session)(error) {
+	ses.subject = "Remove an email address from BlackListMe blacklist confirmation"
+	ses.message = fmt.Sprintf(`Greetings from BlackListMe 
+        This email is to confirm the request to remove %s from the BlackListMe blacklist.
+        Click this URL to confirm  %s 
+ 
+        Regards,
+ 
+           The BlackListMe Team
+        --------------------------------------------------------------------------------
+        You are receiving this email because you recently requested an email address removal from the
+        BlackListMe.net blacklist. If this wasn't you, please ignore this email. No action will be taken.`, 
+		ses.Email, ses.URL)
+	return(sendreq(ses))
+}
+
+// Account based actions
+
+// ConfirmRegistration sends an email to an account based user when they sign up
 func ConfirmRegistration(ses *Session)(error) {
-	ses.subject = "BlackListMe Registration Confirmation"
+	ses.subject = "BlackListMe registration confirmation"
 	ses.message = fmt.Sprintf(`Welcome to BlackListMe 
-                Click this URL to confirm registration. %s 
-		----------------------------------------------------------------------------------
-		You are receiving this email because you recently created a new BlackListMe account 
-		or added a new email address. If this wasn't you, please ignore this email. `, ses.URL)
-	return(sendreq(ses))
-}
-
-func ConfirmEmailChange( ses *Session, oldaddress string) (error){
-	ses.subject = "BlackListMe Email address change Confirmation"
-	ses.message = fmt.Sprintf(`Greetings from BlackListMe 
-        Click this URL to confirm an email address change from %s to %s 
-        %s  
-	----------------------------------------------------------------------------------
-	You are receiving this email because you requested an email address change on your BlackListMe.net account.
-	If this wasn't you, please ignore this email and the action will not be completed. `, 
-		oldaddress, ses.Email, ses.URL)
-	return(sendreq(ses))
-}
-
-func ConfirmPasswordChange( ses *Session) (error){
-	ses.subject = "BlackListMe Password Change Confirmation"
-	ses.message = fmt.Sprintf(`Greetings from BlackListMe 
-        Click this URL to confirm a password change %s
-        ----------------------------------------------------------------------------------
-	You are receiving this email because you requested a password change on your BlackListMe.net account.
-	If this wasn't you, please ignore this email and the action will not be completed.`, ses.URL)
-
-	return(sendreq(ses))
-}
-
-func ConfirmEmailAddressRegistration( ses *Session) (error){
-	ses.subject = "BlackListMe Email Registration Confirmation"
-	ses.message = fmt.Sprintf(`Welcome to BlackListMe
         Click this URL to confirm registration. %s 
-	---------------------------------------------------------------------------------- 
-	You are receiving this email because you registered with BlackListMe.org 
-	If this wasn't you, please ignore this email and the action will not be completed.`, ses.URL)
+ 
+        Regards,
+ 
+           The BlackListMe Team
+
+        --------------------------------------------------------------------------------
+        You are receiving this email because you recently created a new BlackListMe account 
+        or added a new email address. If this wasn't you, please ignore this email. 
+        The account registration will not complete.`, 
+		ses.URL)
 	return(sendreq(ses))
 }
 
-func ConfirmEmailAddressDeRegistration( ses *Session) (error){
-	ses.subject = "BlackListMe Email Deregistration Confirmation"
-	ses.message = fmt.Sprintf(`Greetings from  BlackListMe 
-        Click this URL to confirm an email deregistration. %s
-	----------------------------------------------------------------------------------
-	You are receiving this email because you requested an email be deregistered at BlackListMe.net
-	If this wasn't you, please ignore this email, and the action will not be completed `, ses.URL)
+// ConfirmEmailChangeAddress sends an email to an account based user when they change an account email address
+// this will check to make sure they have the address
+func ConfirmEmailChangeAddress(ses *Session) (error){
+	ses.subject = "BlackListMe account email address verification"
+	ses.message = fmt.Sprintf(`Greetings from BlackListMe 
+        We need to verify your mail to finish updating your email.
+        Click this URL to confirm an email address %s  
+ 
+        Regards,
+ 
+          The BlackListMe Team
+        --------------------------------------------------------------------------------
+        You are receiving this email because you requested an email address change on your BlackListMe.net account.
+        If this wasn't you, please ignore this email and the action will not be completed. `, 
+		ses.Email, ses.URL)
 	return(sendreq(ses))
 }
 
-func NoticePasswordHasChanged( ses *Session) (error){
-	ses.subject = "BlackListMe Password Change Confirmation"
-	ses.message = fmt.Sprintf(`Greetings from  BlackListMe 
-        Click this URL to confirm a password change %s
-	----------------------------------------------------------------------------------
-	You are receiving this email because you requested a password change at BlackListMe.net
-	If this wasn't you, please ignore this email, and the action will not be completed `, ses.URL)
+// NotifyEmailChange sends an email to an account based user when they have changed an email address
+// this is sent once the address has been verified with ConfirmEmailChangeVerify Address
+func NotifyEmailAddressChange(ses *Session, oldaddress string) (error){
+	ses.subject = "BlackListMe account mail address change notification"
+	ses.message = fmt.Sprintf(`Greetings from BlackListMe 
+        Your email address has been changed 
+        from %s 
+        to %s 
+ 
+        Regards,
+ 
+            The BlackListMe Team`,
+		oldaddress, ses.Email)
+	return(sendreq(ses))
+}
+
+// NotifyPasswordChange sends an email to an account based user when they have changed a password
+func NotifyPasswordChange( ses *Session) (error){
+	ses.subject = "BlackListMe account password change notification"
+	ses.message = fmt.Sprintf(`Greetings from BlackListMe 
+        Your BlackListMe account password has been recently changed.
+ 
+        Regards,
+ 
+           The BlackListMe Team`)
 	return(sendreq(ses))
 }
 
@@ -123,16 +153,27 @@ func sendreq(ses *Session)(error) {
 	request.Body = mail.GetRequestBody(m)
 	response, err := sendgrid.API(request)
 	if err != nil {
-		fmt.Println("error")
-		fmt.Println(err)
+		glog.V(2).Infof("Error in sending mail to sendgrid, err = %d", err)
+		message := fmt.Sprintf("Error in sending mail to sendgrid, err = %d", err)
+		glog.Error(message)
 	} else {
-		fmt.Println("success")
-		fmt.Println(response.StatusCode)
-		fmt.Println(response.Body)
-		fmt.Println(response.Headers)
+		message := fmt.Sprintf("Error in sending mail to sendgrid, err = %d", err)
+		message += fmt.Sprintf("StatusCode = %s \n", response.StatusCode)
+		message += fmt.Sprintf("Body = %s \n", response.Body)
+		message += fmt.Sprintf("Headers = %s \n", response.Headers)
+		glog.Info("Success in sending mail to sendgrid \n %s", message)
 	}
 	error := err
 	return(error)
 }
 
-func init() {}
+func init() {
+	flag.Usage = usage
+	flag.Parse()  // must be called for command line flags to work
+}
+
+func usage() {
+	fmt.Fprintf(os.Stderr, "usage: example -stderrthreshold=[INFO|WARN|FATAL] -log_dir=[string]\n", )
+	flag.PrintDefaults()
+	os.Exit(2)
+}
