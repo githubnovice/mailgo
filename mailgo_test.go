@@ -1,8 +1,7 @@
 package mailgo
 
 import (
-	//"github.com/githubnovice/mailgo"
-	"fmt"
+//	"fmt"
 	"testing"
 )
 
@@ -56,6 +55,15 @@ func TestNotifyPasswordChange(t *testing.T) {
 	}
 }
 
+func TestConfirmDomainControlEmail(t *testing.T) {
+	s := Session {Email: "gladwig@gladworx.com", 
+		Domain: "gladworx.com", Fname: "Frank", Lname:"Ziffle", URL:"http://BlackListme/Confirm"}
+	//fmt.Printf("(%v, %T)\n", s, s)
+	err := ConfirmDomainControlEmail(&s)
+	if err != nil {
+		t.Errorf("ConfirmDomainControlEmail Failed\n")
+	}
+}
 
 
 

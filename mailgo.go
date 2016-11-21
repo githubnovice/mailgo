@@ -8,16 +8,10 @@ import (
 	"fmt"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	//"github.com/goinggo/tracelog"
 	"github.com/golang/glog"
-//	"github.com/mailgo/nongit.go"
 	"os"
 	"flag"
 )
-
-//type mailer interface {
-//	send() int
-//}
 
 var blmname = "BlackListMeAdmin"
 var blmemail = "gladwig@gladworx.com"
@@ -26,6 +20,7 @@ type Session struct  {
 	Fname string
 	Lname string
 	Email string
+	Domain string
 	URL string
 	subject string
 	message string
@@ -143,6 +138,21 @@ func NotifyPasswordChange( ses *Session) (error){
            The BlackListMe Team`)
 	return(sendreq(ses))
 }
+//ConfirmDomainControlEmail sends an email to confirm a non-account based user blacklist request
+func ConfirmDomainControlEmail(ses *Session)(error) {
+	ses.subject = "BlackListMe domain control email address confirmation"
+	ses.message = fmt.Sprintf(`Welcome to BlackListMe 
+        This email is to confirm the request to control a domain %s in the BlackListMe blacklist.
+        Click this URL to confirm %s 
+ 
+        Regards,
+ 
+          The BlackListMe Team
+        ---------------------------------------------------------------------------------- 
+        You are receiving this email because you recently requested control of a Domain 
+        at BlackListMe.net. If this wasn't you, please ignore this email` , ses.Domain, ses.URL)
+	return(sendreq(ses))
+}
 
 func sendreq(ses *Session)(error) {
 	from := mail.NewEmail(blmname, blmemail)
@@ -151,8 +161,6 @@ func sendreq(ses *Session)(error) {
 	content := mail.NewContent("text/plain", ses.message)
 	m := mail.NewV3MailInit(from, subject, to, content)
 
-//	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", 
-//		"https://api.sendgrid.com")
 	request := sendgrid.GetRequest(sendgrid_api_key, "/v3/mail/send", 
 		"https://api.sendgrid.com")
 	request.Method = "POST"
@@ -162,8 +170,8 @@ func sendreq(ses *Session)(error) {
 	messageo += fmt.Sprintf("BaseURL = %s \n", request.BaseURL)
 	messageo += fmt.Sprintf("Headers = %s \n", request.Headers)
 	messageo += fmt.Sprintf("QueryParams = %s \n", request.QueryParams)
-	messageo += fmt.Sprintf("Body = %s \n", request.Body)
-	glog.Infof("preparing to send the following message to sendgrid %s \n", messageo)
+	//messageo += fmt.Sprintf("Body = %s \n", request.Body)
+	glog.Infof("preparing to send the following message to sendgrid \n%s \n", messageo)
 	glog.Flush()
 
 	response, err := sendgrid.API(request)
@@ -171,12 +179,12 @@ func sendreq(ses *Session)(error) {
 		message := fmt.Sprintf("Error in sending mail to sendgrid, err = %d", err)
 		glog.Error(message)
 		glog.Flush()
-	} else {
+	} else if response.StatusCode != 202 {
 		message := fmt.Sprintf("err = %d \n", err)
 		message += fmt.Sprintf("StatusCode = %d \n", response.StatusCode)
 		message += fmt.Sprintf("Body = %s \n", response.Body)
 		message += fmt.Sprintf("Headers = %s \n", response.Headers)
-		glog.Info("Success in sending mail to sendgrid %s \n", message)
+		glog.Infof("Error in sending mail to sendgrid,message was sent but return status was not 202 \n %s \n", message)
 		glog.Flush()
 	}
 	error := err
