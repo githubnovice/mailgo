@@ -10,6 +10,7 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	//"github.com/goinggo/tracelog"
 	"github.com/golang/glog"
+//	"github.com/mailgo/nongit.go"
 	"os"
 	"flag"
 )
@@ -150,18 +151,28 @@ func sendreq(ses *Session)(error) {
 	content := mail.NewContent("text/plain", ses.message)
 	m := mail.NewV3MailInit(from, subject, to, content)
 
-	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", 
+//	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", 
+//		"https://api.sendgrid.com")
+	request := sendgrid.GetRequest(sendgrid_api_key, "/v3/mail/send", 
 		"https://api.sendgrid.com")
 	request.Method = "POST"
 	request.Body = mail.GetRequestBody(m)
+
+	messageo := fmt.Sprintf("Method = %s \n", request.Method)
+	messageo += fmt.Sprintf("BaseURL = %s \n", request.BaseURL)
+	messageo += fmt.Sprintf("Headers = %s \n", request.Headers)
+	messageo += fmt.Sprintf("QueryParams = %s \n", request.QueryParams)
+	messageo += fmt.Sprintf("Body = %s \n", request.Body)
+	glog.Infof("preparing to send the following message to sendgrid %s \n", messageo)
+	glog.Flush()
+
 	response, err := sendgrid.API(request)
 	if err != nil {
-		glog.V(2).Infof("Error in sending mail to sendgrid, err = %d \n", err)
 		message := fmt.Sprintf("Error in sending mail to sendgrid, err = %d", err)
 		glog.Error(message)
 		glog.Flush()
 	} else {
-		message := fmt.Sprintf("Success in sending mail to sendgrid, err = %d \n", err)
+		message := fmt.Sprintf("err = %d \n", err)
 		message += fmt.Sprintf("StatusCode = %d \n", response.StatusCode)
 		message += fmt.Sprintf("Body = %s \n", response.Body)
 		message += fmt.Sprintf("Headers = %s \n", response.Headers)
